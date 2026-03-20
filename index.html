@@ -106,6 +106,25 @@ body { font-family: 'Sarabun', sans-serif; background: var(--cream); color: var(
   .step-label { font-size: 10px; }
 }
 </style>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCbtjoF4boc1qgnOTThHthxYiVCJMsfjO4",
+    authDomain: "carely-169b9.firebaseapp.com",
+    projectId: "carely-169b9",
+    storageBucket: "carely-169b9.firebasestorage.app",
+    messagingSenderId: "302078716521",
+    appId: "1:302078716521:web:32fe6bda3838939cbe10f8"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  window._db = db;
+  window._addDoc = addDoc;
+  window._collection = collection;
+</script>
 </head>
 <body>
 
@@ -601,7 +620,7 @@ function getGender(){
   return sel.value==='other-gender'?document.getElementById('gender-other').value:sel.value;
 }
 
-function submitForm(){
+async function submitForm(){
   const data={
     ref: genRef(), submittedAt: nowStr(), photo: photoData,
     fname: document.getElementById('fname').value,
@@ -640,10 +659,8 @@ function submitForm(){
     rating: null
   };
   try {
-    const existing=JSON.parse(localStorage.getItem('carely_applicants')||'[]');
-    existing.push(data);
-    localStorage.setItem('carely_applicants', JSON.stringify(existing));
-    localStorage.removeItem('carely_draft');
+    await window._addDoc(window._collection(window._db, 'applicants'), data);
+localStorage.removeItem('carely_draft');
     const SHEET_URL = "https://script.google.com/macros/s/AKfycbw2HLERNs9FONx26glnATunuGhYyxrVZR1X61RfcFAqu0AZge9uPQtjI2gRF8diaqk2/exec";
 fetch(SHEET_URL, {
   method: 'POST',
