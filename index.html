@@ -510,9 +510,23 @@ function toggleDegreeOther(){ document.getElementById('deg-other-reveal').classL
 
 function previewPhoto(input){
   if(input.files && input.files[0]){
-    const r=new FileReader();
-    r.onload=e=>{ photoData=e.target.result; document.getElementById('photo-placeholder').innerHTML=`<img src="${photoData}" style="width:110px;height:110px;object-fit:cover;border-radius:50%">`; };
-    r.readAsDataURL(input.files[0]);
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 400;
+        let w = img.width, h = img.height;
+        if(w > h){ if(w > MAX){ h = h*(MAX/w); w = MAX; } }
+        else { if(h > MAX){ w = w*(MAX/h); h = MAX; } }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        photoData = canvas.toDataURL('image/jpeg', 0.7);
+        document.getElementById('photo-placeholder').innerHTML = `<img src="${photoData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
   }
 }
 function autoSave(){
